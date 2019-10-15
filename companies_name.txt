@@ -1,0 +1,20 @@
+WFC, Wells Fargo & Company, Wells Fargo
+BAC, Bank of America Corporation, Bank of America Global Wealth and Investment Management,
+C, Citigroup Inc., Citigroup
+JPM, JPMorgan Chase & Co., JP Morgan Private Bank
+MS, Morgan Stanley, Morgan Stanley Wealth Management
+GS, The Goldman Sachs Group, Inc., Goldman Sachs Group
+AXP, American Express Company, American Express
+FHN, First Horizon National, First Horizon National Corporation
+USNQX, USAA NASDAQ-100 Index Fund, USAA
+COF, Capital One Financial Corporation, Capital One Financial
+XOM, Exxon Mobil Corporation, ExxonMobil
+BRK-A, Berkshire Hathaway Inc., Berkshire Hathaway
+UNH, UnitedHealth Group Incorporated, UnitedHealth
+MCK, McKesson Corporation, McKesson
+CVS, CVS Health Corporation, CVS Health
+T, AT&T Inc., AT&T
+ABC, AmerisourceBergen Corporation, AmerisourceBergen
+CVX, Chevron Corporation, Chevron
+GM, General Motors Company, General Motors
+COST, Costco Wholesale Corporation, Costco
