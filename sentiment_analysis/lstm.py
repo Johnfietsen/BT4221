@@ -18,21 +18,31 @@ def main():
     embed_dim = 128
     lstm_out = 196
     dropout = 0.2
-    batch_size = 256
-    epochs = 1
+    test_split = 0.2
+    val_split = 0.2
+
+    # for sentiment140 set batch_size==256, for smaller datasets set smaller!
+    batch_size = 32
+    epochs = 4
     # size of "vocabulary" for one hot vectors
     nr_words = 2000
 
     # give file for training data and possible pretrained model
-    data_file = "test.csv"
+    data_file = "cleaned_data.csv"
     folder_pretrained = "run2"
     pretrain = False
 
-    # read train data
+    # read train datals
     data = pd.read_csv("data/{}".format(data_file), encoding='latin-1', header=None)
 
     # give dataframe column names
-    data = data.rename(columns={0:"sentiment", 5:"tweet"})
+    if data_file == "sanders.csv":
+        data = data.rename(columns={0:"sentiment", 1:"tweet"})
+
+    else:
+        data = data.rename(columns={0:"sentiment", 5:"tweet"})
+
+
 
     # make sure every tweet is a string
     data['tweet'] = data['tweet'].apply(lambda x: str(x))
@@ -47,7 +57,7 @@ def main():
     Y = pd.get_dummies(data['sentiment']).values
 
     # take part of train vor validation
-    X_train, X_test, Y_train, Y_test = train_test_split(X,Y, test_size = 0.2, random_state = 42)
+    X_train, X_test, Y_train, Y_test = train_test_split(X,Y, test_size = test_split, random_state = 42)
 
     print("Train: ", X_train.shape,Y_train.shape)
     print("Test: ", X_test.shape,Y_test.shape)
@@ -60,7 +70,7 @@ def main():
         model.add(Embedding(nr_words, embed_dim,input_length = X_test.shape[1]))
         model.add(SpatialDropout1D(0.4))
         model.add(LSTM(lstm_out, dropout=dropout, recurrent_dropout=0.2))
-        model.add(Dense(3,activation='softmax'))
+        model.add(Dense(2,activation='softmax'))
     else:
         print("Using pretrained model")
         # load json and create model
@@ -77,7 +87,7 @@ def main():
     model.compile(loss = 'categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     # train model and evaluate
-    history = model.fit(X_train, Y_train, epochs=epochs, batch_size=batch_size, verbose = 1, validation_split=0.2)
+    history = model.fit(X_train, Y_train, epochs=epochs, batch_size=batch_size, verbose = 1, validation_split=val_split)
     results = model.evaluate(X_test, Y_test, verbose=2, batch_size=batch_size)
 
     # print results
@@ -100,8 +110,8 @@ def main():
 
 
     # create plots
-    create_plot(history.history["val_loss"], "Epochs", "Validation loss", "loss_", timestamp)
-    create_plot(history.history["val_acc"], "Epochs", "Accuracy", "accuracy_", timestamp)
+    create_plot(history.history["val_loss"], history.history["loss"], "Epochs", "Validation loss", "loss_", timestamp)
+    create_plot(history.history["val_acc"], history.history["acc"], "Epochs", "Accuracy", "accuracy_", timestamp)
 
     # save tokenizer
     with open("results/{}/tokenizer.pickle".format(timestamp), 'wb') as handle:
@@ -117,11 +127,14 @@ def main():
     model.save_weights("results/{}/model.h5".format(timestamp))
     print("Saved model to disk")
 
-def create_plot(data, xlabel, ylabel, title, timestamp):
-    plt.plot(data)
+def create_plot(data_val, data_train, xlabel, ylabel, title, timestamp):
+    plt.plot(data_val, label="val")
+    plt.plot(data_train, label="train")
+    plt.legend()
     plt.ylabel(ylabel)
     plt.xlabel(xlabel)
     plt.savefig("results/{}/{}.png".format(timestamp, title))
+    plt.close()
 
 
 if __name__ == "__main__":
