@@ -23,14 +23,14 @@ def main():
 
     # for sentiment140 set batch_size==256, for smaller datasets set smaller!
     batch_size = 32
-    epochs = 4
+    epochs = 15
     # size of "vocabulary" for one hot vectors
     nr_words = 2000
 
     # give file for training data and possible pretrained model
     data_file = "cleaned_data.csv"
-    folder_pretrained = "run2"
-    pretrain = False
+    folder_pretrained = "run1"
+    pretrain = True
 
     # read train datals
     data = pd.read_csv("data/{}".format(data_file), encoding='latin-1', header=None)
@@ -47,13 +47,19 @@ def main():
     # make sure every tweet is a string
     data['tweet'] = data['tweet'].apply(lambda x: str(x))
 
-    # fit one-hot encoding on train data
-    tokenizer = Tokenizer(num_words=nr_words, split=' ')
-    tokenizer.fit_on_texts(data['tweet'].values)
+
+
+    if pretrain == False:
+        # fit one-hot encoding on train data
+        tokenizer = Tokenizer(num_words=nr_words, split=' ')
+        tokenizer.fit_on_texts(data['tweet'].values)
+    else:
+        with open('results/{}/tokenizer.pickle'.format(folder_pretrained), 'rb') as handle:
+            tokenizer = pickle.load(handle)
 
     # create (x,y) for train data
     X = tokenizer.texts_to_sequences(data['tweet'].values)
-    X = pad_sequences(X)
+    X = pad_sequences(X, maxlen=40)
     Y = pd.get_dummies(data['sentiment']).values
 
     # take part of train vor validation
