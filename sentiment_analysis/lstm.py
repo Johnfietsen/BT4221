@@ -28,17 +28,16 @@ def main():
     nr_words = 2000
 
     # give file for training data and possible pretrained model
-    data_file = "cleaned_data.csv"
+    data_file = "semeval_balanced.csv"
     folder_pretrained = "run1"
-    pretrain = True
+    pretrain = False
 
     # read train datals
     data = pd.read_csv("data/{}".format(data_file), encoding='latin-1', header=None)
 
     # give dataframe column names
-    if data_file == "sanders.csv":
+    if data_file == "sanders.csv" or data_file == "semeval_balanced.csv":
         data = data.rename(columns={0:"sentiment", 1:"tweet"})
-
     else:
         data = data.rename(columns={0:"sentiment", 5:"tweet"})
 
