@@ -12,23 +12,29 @@ from collections import Counter
 import pickle
 from datetime import datetime
 import os
+import argparse
+
+FLAGS = None
+EMBED_DIM_DEFAULT = 128
+LSTM_OUT_DEFAULT = 128
+
 
 def main():
     # Hyperparameters, LOOK INTO THIS
-    embed_dim = 128
-    lstm_out = 196
+    embed_dim = FLAGS.embed_dim
+    lstm_out = FLAGS.lstm_out
     dropout = 0.2
     test_split = 0.2
     val_split = 0.2
 
     # for sentiment140 set batch_size==256, for smaller datasets set smaller!
-    batch_size = 32
-    epochs = 15
+    batch_size = 256
+    epochs = 1
     # size of "vocabulary" for one hot vectors
     nr_words = 2000
 
     # give file for training data and possible pretrained model
-    data_file = "semeval_balanced.csv"
+    data_file = "cleaned_data.csv"
     folder_pretrained = "run1"
     pretrain = False
 
@@ -131,6 +137,7 @@ def main():
     # serialize weights to HDF5
     model.save_weights("results/{}/model.h5".format(timestamp))
     print("Saved model to disk")
+    write_settings(embed_dim, lstm_out, history, results, timestamp)
 
 def create_plot(data_val, data_train, xlabel, ylabel, title, timestamp):
     plt.plot(data_val, label="val")
@@ -141,6 +148,22 @@ def create_plot(data_val, data_train, xlabel, ylabel, title, timestamp):
     plt.savefig("results/{}/{}.png".format(timestamp, title))
     plt.close()
 
+def write_settings(embed_dim, lstm_out, history, results, timestamp):
+    file = open("results/{}/settings_results.txt".format(timestamp),"w")
+    file.write("embed: " + str(embed_dim) + "\n")
+    file.write("lstm_out: " + str(lstm_out) + "\n")
+    file.write(str(history.history) + "\n")
+    file.write(str(results))
+    file.close()
+
+
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--embed_dim', type = int, default = EMBED_DIM_DEFAULT,
+                        help='embedding size lstm')
+    parser.add_argument('--lstm_out', type = int, default = LSTM_OUT_DEFAULT,
+                        help='size fully connected layer lstm')
+    FLAGS, unparsed = parser.parse_known_args()
+
     main()
