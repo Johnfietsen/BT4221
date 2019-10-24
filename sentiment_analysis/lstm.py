@@ -14,10 +14,15 @@ from datetime import datetime
 import os
 import argparse
 
+# default settings
 FLAGS = None
 EMBED_DIM_DEFAULT = 128
 LSTM_OUT_DEFAULT = 128
-
+FOLDER_PRETRAINED_DEFAULT = "run1"
+DATA_FILE_DEFAULT = "sanders.csv"
+PRETRAIN_DEFAULT = False
+BATCH_SIZE_DEFAULT = 32
+EPOCHS_DEFAULT = 20
 
 def main():
     # Hyperparameters, LOOK INTO THIS
@@ -28,24 +33,26 @@ def main():
     val_split = 0.2
 
     # for sentiment140 set batch_size==256, for smaller datasets set smaller!
-    batch_size = 256
-    epochs = 1
+    batch_size = FLAGS.batch_size
+    epochs = FLAGS.epochs
     # size of "vocabulary" for one hot vectors
     nr_words = 2000
 
     # give file for training data and possible pretrained model
-    data_file = "cleaned_data.csv"
-    folder_pretrained = "run1"
-    pretrain = False
+    data_file = FLAGS.data_file
+    folder_pretrained = FLAGS.folder_pretrained
+    pretrain = FLAGS.pretrain
 
     # read train datals
     data = pd.read_csv("data/{}".format(data_file), encoding='latin-1', header=None)
 
     # give dataframe column names
-    if data_file == "sanders.csv" or data_file == "semeval_balanced.csv":
+    if data_file == "sanders.csv" or data_file == "semeval_balanced.csv" or data_file == "semeval_sanders.csv":
         data = data.rename(columns={0:"sentiment", 1:"tweet"})
+        batch_size = 32
     else:
         data = data.rename(columns={0:"sentiment", 5:"tweet"})
+        batch_size = 256
 
 
 
@@ -137,7 +144,7 @@ def main():
     # serialize weights to HDF5
     model.save_weights("results/{}/model.h5".format(timestamp))
     print("Saved model to disk")
-    write_settings(embed_dim, lstm_out, history, results, timestamp)
+    write_settings(embed_dim, lstm_out, history, results, timestamp, pretrain, data_file, folder_pretrained, batch_size, epochs)
 
 def create_plot(data_val, data_train, xlabel, ylabel, title, timestamp):
     plt.plot(data_val, label="val")
@@ -148,10 +155,15 @@ def create_plot(data_val, data_train, xlabel, ylabel, title, timestamp):
     plt.savefig("results/{}/{}.png".format(timestamp, title))
     plt.close()
 
-def write_settings(embed_dim, lstm_out, history, results, timestamp):
+def write_settings(embed_dim, lstm_out, history, results, timestamp, pretrain, data_file, folder_pretrained, batch_size, epochs):
     file = open("results/{}/settings_results.txt".format(timestamp),"w")
     file.write("embed: " + str(embed_dim) + "\n")
     file.write("lstm_out: " + str(lstm_out) + "\n")
+    file.write("pretrained: " + str(pretrain) + "\n")
+    file.write("data_file: " + str(data_file) + "\n")
+    file.write("batch_size: " + str(batch_size) + "\n")
+    file.write("folder_pretrained: " + str(folder_pretrained) + "\n")
+    file.write("epochs: " + str(epochs) + "\n")
     file.write(str(history.history) + "\n")
     file.write(str(results))
     file.close()
@@ -164,6 +176,16 @@ if __name__ == "__main__":
                         help='embedding size lstm')
     parser.add_argument('--lstm_out', type = int, default = LSTM_OUT_DEFAULT,
                         help='size fully connected layer lstm')
+    parser.add_argument('--data_file', type = str, default = DATA_FILE_DEFAULT,
+                        help='data file')
+    parser.add_argument('--folder_pretrained', type = str, default = FOLDER_PRETRAINED_DEFAULT,
+                        help='pretrained model')
+    parser.add_argument('--pretrain', type= bool, default= PRETRAIN_DEFAULT,
+                        help='continue training using old model')
+    parser.add_argument('--batch_size', type= int, default= BATCH_SIZE_DEFAULT,
+                        help='batch size')
+    parser.add_argument('--epochs', type= int, default= EPOCHS_DEFAULT,
+                        help='epochs')
     FLAGS, unparsed = parser.parse_known_args()
 
     main()
