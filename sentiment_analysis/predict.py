@@ -78,10 +78,10 @@ def main():
 def create_csv(scores):
     with open('results/score.csv', 'w') as csvfile:
         filewriter = csv.writer(csvfile, delimiter=',')
-        filewriter.writerow(["File", "Negative", "Positive"])
+        filewriter.writerow(["File", "Negative", "Positive", "ratio neg/pos"])
         for score in scores:
             file = score.split("/")[-1]
-            filewriter.writerow([file, scores[score][0], scores[score][1]])
+            filewriter.writerow([file, scores[score][0], scores[score][1],  scores[score][0]/scores[score][1]])
 
 def count_pos_neg(predictions):
     negative = 0
